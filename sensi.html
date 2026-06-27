@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>macro.com | Panel de Control Real</title>
+    <script src="https://cdn.jsdelivr.net/npm/webadb4@1.0.0/dist/webadb.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #04060a; color: #00ffcc; font-family: monospace; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+        .panel { width: 100%; max-width: 440px; border: 1px solid rgba(0, 255, 204, 0.3); padding: 25px; border-radius: 12px; background: rgba(0,255,204,0.01); box-shadow: 0 0 25px rgba(0,255,204,0.1); }
+        h1 { font-size: 24px; text-shadow: 0 0 10px #00ffcc; letter-spacing: 3px; margin-bottom: 2px; text-align: center; }
+        .sub { font-size: 10px; color: rgba(0, 255, 204, 0.6); margin-bottom: 15px; letter-spacing: 2px; text-align: center; }
+        .status-box { background: rgba(255, 0, 85, 0.1); border: 1px solid #ff0055; color: #ff3377; padding: 12px; font-size: 11px; margin-bottom: 20px; border-radius: 6px; font-weight: bold; text-align: center; }
+        .status-ok { background: rgba(0, 255, 100, 0.1); border: 1px solid #00ff66; color: #00ff66; }
+        .seccion-titulo { font-size: 12px; color: #fff; text-align: left; margin: 15px 0 5px 0; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 3px; text-transform: uppercase; }
+        .grid-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn { width: 100%; padding: 14px; background: rgba(0, 255, 204, 0.04); color: #00ffcc; border: 1px solid #00ffcc; font-weight: bold; font-family: inherit; font-size: 11px; cursor: pointer; text-shadow: 0 0 5px #00ffcc; text-transform: uppercase; border-radius: 4px; }
+        .btn:active { background: #00ffcc; color: #04060a; box-shadow: 0 0 15px #00ffcc; text-shadow: none; }
+        .btn-full { grid-column: span 2; }
+        .btn-danger { color: #ff4444; border-color: #ff4444; text-shadow: 0 0 5px #ff4444; }
+        .btn-danger:active { background: #ff4444; color: #000; box-shadow: 0 0 15px #ff4444; text-shadow: none; }
+        #consola { background: #000; color: #00ff66; padding: 12px; font-size: 11px; height: 100px; overflow-y: auto; text-align: left; margin-top: 20px; border-radius: 6px; border: 1px solid #111; }
+    </style>
+</head>
+<body>
+
+    <div class="panel">
+        <h1>MACRO.COM</h1>
+        <div class="sub">AIM ASSIST & HARDWARE INJECTOR</div>
+        
+        <div id="usb-status" class="status-box">HARDWARE SIN ENLAZAR: CONECTA EL CABLE USB</div>
+
+        <button class="btn btn-full" style="background: rgba(0,255,204,0.15);" onclick="conectarMovil()">🔌 1. EMPAREJAR DISPOSITIVO</button>
+        
+        <div class="seccion-titulo">Regulación de Píxeles (Eje X/Y)</div>
+        <div class="grid-botones">
+            <button class="btn" onclick="inyectar('wm size 540x960 && wm density 240', 'Pantalla Estirada Competitiva (Modelos Anchos)')">Estirado 540p</button>
+            <button class="btn" onclick="inyectar('wm size 720x1280 && wm density 320', 'Pantalla Estirada Equilibrada (Alta Definición)')">Estirado 720p</button>
+        </div>
+
+        <div class="seccion-titulo">Filtros de Sensibilidad Física</div>
+        <div class="grid-botones">
+            <button class="btn" onclick="inyectar('settings put system pointer_speed 7', 'Velocidad del Puntero fijada en Nivel 7')">Puntero Max</button>
+            <button class="btn" onclick="inyectar('settings put secure long_press_timeout 100', 'Retraso Táctil al Mínimo (Respuesta Instantánea)')">Toque Veloz</button>
+            <button class="btn" onclick="inyectar('settings put system touch_pump 1', 'Filtro Touch Pump Inyectado (Fijación de Mira)')">Touch Pump</button>
+            <button class="btn" onclick="inyectar('settings put secure touch_exploration_speed 200', 'Exploración Táctil Acelerada para Eje Y')">Eje Y Booster</button>
+        </div>
+
+        <div class="seccion-titulo">Estabilizadores de Disparo</div>
+        <div class="grid-botones">
+            <button class="btn" onclick="inyectar('settings put system view_scroll_friction 0.001', 'Fricción de Desplazamiento eliminada (Mira Fluida)')">Cero Fricción</button>
+            <button class="btn" onclick="inyectar('settings put secure accessibility_display_magnification_auto_update 0', 'Auto-corrección de Píxeles Desactivada (Mira Estable)')">Anti-Parpadeo</button>
+        </div>
+
+        <div class="seccion-titulo">Mantenimiento de Fábrica</div>
+        <button class="btn btn-full btn-danger" onclick="restaurarTodo()">🔄 RESTAURAR HARDWARE POR DEFECTO</button>
+
+        <div id="consola">> macro.com listo. Conecta el cable y presiona Emparejar...</div>
+    </div>
+
+    <script>
+        let dispositivoAdb = null;
+        const consola = document.getElementById('consola');
+        const usbStatus = document.getElementById('usb-status');
+
+        function log(texto) { consola.innerHTML += `<br>> ${texto}`; consola.scrollTop = consola.scrollHeight; }
+
+        async function conectarMovil() {
+            try {
+                log("Buscando puerto USB...");
+                dispositivoAdb = await Adb.open("webusb");
+                await dispositivoAdb.connect();
+                
+                usbStatus.innerText = "CONEXIÓN EXITOSA: MACRO.COM HARDWARE EN LINEA";
+                usbStatus.className = "status-box status-ok";
+                log("Enlace establecido. Registros listos para inyección.");
+            } catch (err) {
+                usbStatus.innerText = "ERROR: REVISA LA DEPURACIÓN USB O EL CABLE";
+                usbStatus.className = "status-box";
+                log("Conexión fallida. Recuerda activar 'Depuración USB' en tu móvil.");
+                console.error(err);
+            }
+        }
+
+        async function inyectar(comando, detalle) {
+            if (!dispositivoAdb) return log("ERROR: Primero debes emparejar el dispositivo.");
+            log(`Modificando registro: ${comando.split(' ')[0]}...`);
+            try {
+                let shell = await dispositivoAdb.shell(comando);
+                await shell.receive();
+                log(`ÉXITO: ${detalle}`);
+            } catch(e) {
+                log("Error crítico al enviar parámetros de hardware o falta aceptar el RSA en pantalla.");
+            }
+        }
+
+        async function restaurarTodo() {
+            if (!dispositivoAdb) return log("ERROR: Dispositivo no enlazado.");
+            log("Limpiando registros de sensibilidad modificados...");
+            try {
+                await dispositivoAdb.shell("wm size reset && wm density reset");
+                await dispositivoAdb.shell("settings put system pointer_speed 0");
+                await dispositivoAdb.shell("settings put secure long_press_timeout 300");
+                await dispositivoAdb.shell("settings put system view_scroll_friction 0.005");
+                await dispositivoAdb.shell("settings put system touch_pump 0");
+                log("ÉXITO: Teléfono restaurado a los valores originales de fábrica.");
+            } catch(e) {
+                log("Error al aplicar el reset completo.");
+            }
+        }
+    </script>
+</body>
+</html>
