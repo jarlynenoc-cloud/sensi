@@ -1,114 +1,359 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>macro.com | Panel de Control Real</title>
-    <script src="https://cdn.jsdelivr.net/npm/webadb4@1.0.0/dist/webadb.min.js"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #04060a; color: #00ffcc; font-family: monospace; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
-        .panel { width: 100%; max-width: 440px; border: 1px solid rgba(0, 255, 204, 0.3); padding: 25px; border-radius: 12px; background: rgba(0,255,204,0.01); box-shadow: 0 0 25px rgba(0,255,204,0.1); }
-        h1 { font-size: 24px; text-shadow: 0 0 10px #00ffcc; letter-spacing: 3px; margin-bottom: 2px; text-align: center; }
-        .sub { font-size: 10px; color: rgba(0, 255, 204, 0.6); margin-bottom: 15px; letter-spacing: 2px; text-align: center; }
-        .status-box { background: rgba(255, 0, 85, 0.1); border: 1px solid #ff0055; color: #ff3377; padding: 12px; font-size: 11px; margin-bottom: 20px; border-radius: 6px; font-weight: bold; text-align: center; }
-        .status-ok { background: rgba(0, 255, 100, 0.1); border: 1px solid #00ff66; color: #00ff66; }
-        .seccion-titulo { font-size: 12px; color: #fff; text-align: left; margin: 15px 0 5px 0; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 3px; text-transform: uppercase; }
-        .grid-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn { width: 100%; padding: 14px; background: rgba(0, 255, 204, 0.04); color: #00ffcc; border: 1px solid #00ffcc; font-weight: bold; font-family: inherit; font-size: 11px; cursor: pointer; text-shadow: 0 0 5px #00ffcc; text-transform: uppercase; border-radius: 4px; }
-        .btn:active { background: #00ffcc; color: #04060a; box-shadow: 0 0 15px #00ffcc; text-shadow: none; }
-        .btn-full { grid-column: span 2; }
-        .btn-danger { color: #ff4444; border-color: #ff4444; text-shadow: 0 0 5px #ff4444; }
-        .btn-danger:active { background: #ff4444; color: #000; box-shadow: 0 0 15px #ff4444; text-shadow: none; }
-        #consola { background: #000; color: #00ff66; padding: 12px; font-size: 11px; height: 100px; overflow-y: auto; text-align: left; margin-top: 20px; border-radius: 6px; border: 1px solid #111; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>macro.com | Panel de Control Real</title>
+  <script src="https://cdn.jsdelivr.net/npm/webadb4@1.0.0/dist/webadb.min.js" defer></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: #04060a;
+      color: #00ffcc;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .panel {
+      width: 100%;
+      max-width: 640px;
+      border: 1px solid rgba(0, 255, 204, 0.15);
+      padding: 22px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(0,255,204,0.02), rgba(0,0,0,0.02));
+      box-shadow: 0 8px 30px rgba(0,255,204,0.03);
+    }
+    header { text-align: center; margin-bottom: 8px; }
+    h1 { font-size: 24px; text-shadow: 0 0 10px #00ffcc; letter-spacing: 3px; margin-bottom: 6px; }
+    .sub { font-size: 12px; color: rgba(0,255,204,0.65); margin-bottom: 16px; letter-spacing: 1.5px; }
+    .status-box {
+      background: rgba(255, 0, 85, 0.06);
+      border: 1px solid rgba(255, 0, 85, 0.25);
+      color: #ff66a6;
+      padding: 12px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      text-align: center;
+    }
+    .status-ok { background: rgba(0,255,100,0.05); border-color: rgba(0,255,100,0.25); color: #8effc8; }
+    .seccion-titulo {
+      font-size: 13px;
+      color: #ffffff;
+      text-align: left;
+      margin: 18px 0 8px 0;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      padding-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .grid-botones {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: rgba(0, 255, 204, 0.04);
+      color: #00ffcc;
+      border: 1px solid rgba(0,255,204,0.25);
+      font-weight: 700;
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      border-radius: 8px;
+      transition: all 0.12s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      filter: grayscale(0.2);
+    }
+    .btn-full { grid-column: 1 / -1; padding: 14px; }
+    .btn-danger {
+      color: #ffb0b0;
+      border-color: rgba(255,68,68,0.3);
+      text-shadow: 0 0 5px rgba(255,68,68,0.25);
+      background: rgba(255,68,68,0.02);
+    }
+    #consola {
+      background: #000;
+      color: #00ff66;
+      padding: 12px;
+      font-size: 12px;
+      height: 140px;
+      overflow-y: auto;
+      text-align: left;
+      margin-top: 18px;
+      border-radius: 8px;
+      border: 1px solid #111;
+      white-space: pre-wrap;
+    }
+    .meta {
+      display:flex;
+      gap:8px;
+      justify-content:center;
+      margin-top:8px;
+      color: rgba(0,255,204,0.55);
+      font-size: 12px;
+    }
+    @media (max-width:480px){
+      .panel { padding: 14px; }
+      .grid-botones { grid-template-columns: 1fr 1fr; gap:8px; }
+      #consola { height: 120px; font-size: 11px; }
+    }
+  </style>
 </head>
 <body>
+  <main class="panel" role="main" aria-labelledby="panel-title">
+    <header>
+      <h1 id="panel-title">MACRO.COM</h1>
+      <div class="sub">AIM ASSIST & HARDWARE INJECTOR — USO RESPONSABLE</div>
+    </header>
 
-    <div class="panel">
-        <h1>MACRO.COM</h1>
-        <div class="sub">AIM ASSIST & HARDWARE INJECTOR</div>
-        
-        <div id="usb-status" class="status-box">HARDWARE SIN ENLAZAR: CONECTA EL CABLE USB</div>
-
-        <button class="btn btn-full" style="background: rgba(0,255,204,0.15);" onclick="conectarMovil()">🔌 1. EMPAREJAR DISPOSITIVO</button>
-        
-        <div class="seccion-titulo">Regulación de Píxeles (Eje X/Y)</div>
-        <div class="grid-botones">
-            <button class="btn" onclick="inyectar('wm size 540x960 && wm density 240', 'Pantalla Estirada Competitiva (Modelos Anchos)')">Estirado 540p</button>
-            <button class="btn" onclick="inyectar('wm size 720x1280 && wm density 320', 'Pantalla Estirada Equilibrada (Alta Definición)')">Estirado 720p</button>
-        </div>
-
-        <div class="seccion-titulo">Filtros de Sensibilidad Física</div>
-        <div class="grid-botones">
-            <button class="btn" onclick="inyectar('settings put system pointer_speed 7', 'Velocidad del Puntero fijada en Nivel 7')">Puntero Max</button>
-            <button class="btn" onclick="inyectar('settings put secure long_press_timeout 100', 'Retraso Táctil al Mínimo (Respuesta Instantánea)')">Toque Veloz</button>
-            <button class="btn" onclick="inyectar('settings put system touch_pump 1', 'Filtro Touch Pump Inyectado (Fijación de Mira)')">Touch Pump</button>
-            <button class="btn" onclick="inyectar('settings put secure touch_exploration_speed 200', 'Exploración Táctil Acelerada para Eje Y')">Eje Y Booster</button>
-        </div>
-
-        <div class="seccion-titulo">Estabilizadores de Disparo</div>
-        <div class="grid-botones">
-            <button class="btn" onclick="inyectar('settings put system view_scroll_friction 0.001', 'Fricción de Desplazamiento eliminada (Mira Fluida)')">Cero Fricción</button>
-            <button class="btn" onclick="inyectar('settings put secure accessibility_display_magnification_auto_update 0', 'Auto-corrección de Píxeles Desactivada (Mira Estable)')">Anti-Parpadeo</button>
-        </div>
-
-        <div class="seccion-titulo">Mantenimiento de Fábrica</div>
-        <button class="btn btn-full btn-danger" onclick="restaurarTodo()">🔄 RESTAURAR HARDWARE POR DEFECTO</button>
-
-        <div id="consola">> macro.com listo. Conecta el cable y presiona Emparejar...</div>
+    <div id="usb-status" class="status-box" role="status" aria-live="polite">
+      HARDWARE SIN ENLAZAR: CONECTA EL CABLE USB
     </div>
 
-    <script>
-        let dispositivoAdb = null;
-        const consola = document.getElementById('consola');
-        const usbStatus = document.getElementById('usb-status');
+    <div style="display:flex; gap:10px; margin-bottom:12px;">
+      <button id="btn-pair" class="btn btn-full" style="flex:1;" aria-controls="consola">🔌 1. EMPAREJAR DISPOSITIVO</button>
+    </div>
 
-        function log(texto) { consola.innerHTML += `<br>> ${texto}`; consola.scrollTop = consola.scrollHeight; }
+    <section>
+      <div class="seccion-titulo">Regulación de Píxeles (Eje X/Y)</div>
+      <div class="grid-botones">
+        <button class="btn cmd" data-cmd="wm size 540x960 && wm density 240" data-detail="Pantalla Estirada Competitiva (Modelos Anchos)">Estirado 540p</button>
+        <button class="btn cmd" data-cmd="wm size 720x1280 && wm density 320" data-detail="Pantalla Estirada Equilibrada (Alta Definición)">Estirado 720p</button>
+      </div>
+    </section>
 
-        async function conectarMovil() {
-            try {
-                log("Buscando puerto USB...");
-                dispositivoAdb = await Adb.open("webusb");
-                await dispositivoAdb.connect();
-                
-                usbStatus.innerText = "CONEXIÓN EXITOSA: MACRO.COM HARDWARE EN LINEA";
-                usbStatus.className = "status-box status-ok";
-                log("Enlace establecido. Registros listos para inyección.");
-            } catch (err) {
-                usbStatus.innerText = "ERROR: REVISA LA DEPURACIÓN USB O EL CABLE";
-                usbStatus.className = "status-box";
-                log("Conexión fallida. Recuerda activar 'Depuración USB' en tu móvil.");
-                console.error(err);
+    <section>
+      <div class="seccion-titulo">Filtros de Sensibilidad Física</div>
+      <div class="grid-botones">
+        <button class="btn cmd" data-cmd="settings put system pointer_speed 7" data-detail="Velocidad del Puntero fijada en Nivel 7">Puntero Max</button>
+        <button class="btn cmd" data-cmd="settings put secure long_press_timeout 100" data-detail="Retraso Táctil al Mínimo (Respuesta Instantánea)">Toque Veloz</button>
+        <button class="btn cmd" data-cmd="settings put system touch_pump 1" data-detail="Filtro Touch Pump Inyectado (Fijación de Mira)">Touch Pump</button>
+        <button class="btn cmd" data-cmd="settings put secure touch_exploration_speed 200" data-detail="Exploración Táctil Acelerada para Eje Y">Eje Y Booster</button>
+      </div>
+    </section>
+
+    <section>
+      <div class="seccion-titulo">Estabilizadores de Disparo</div>
+      <div class="grid-botones">
+        <button class="btn cmd" data-cmd="settings put system view_scroll_friction 0.001" data-detail="Fricción de Desplazamiento eliminada (Mira Fluida)">Cero Fricción</button>
+        <button class="btn cmd" data-cmd="settings put secure accessibility_display_magnification_auto_update 0" data-detail="Auto-corrección de Píxeles Desactivada (Mira Estable)">Anti-Parpadeo</button>
+      </div>
+    </section>
+
+    <section>
+      <div class="seccion-titulo">Mantenimiento de Fábrica</div>
+      <button id="btn-reset" class="btn btn-full btn-danger" data-confirm="true">🔄 RESTAURAR HARDWARE POR DEFECTO</button>
+    </section>
+
+    <div id="consola" aria-live="polite" aria-atomic="false">&gt; macro.com listo. Conecta el cable y presiona Emparejar...</div>
+
+    <div class="meta">Repositorio: <strong>jarlynenoc-cloud/sensi</strong> • Uso responsable y autorización requerida del dispositivo</div>
+  </main>
+
+  <script>
+    // Centralized state
+    let dispositivoAdb = null;
+    const consola = document.getElementById('consola');
+    const usbStatus = document.getElementById('usb-status');
+    const btnPair = document.getElementById('btn-pair');
+    const btnReset = document.getElementById('btn-reset');
+    const cmdButtons = Array.from(document.querySelectorAll('.cmd'));
+
+    function logLinea(texto, type = 'info') {
+      const prefix = '> ';
+      const time = new Date().toLocaleTimeString();
+      const line = `${prefix}[${time}] ${texto}`;
+      consola.textContent += "\n" + line;
+      consola.scrollTop = consola.scrollHeight;
+      // also print to console for dev
+      if (type === 'error') console.error(texto);
+      else console.info(texto);
+    }
+
+    function setStatus(text, ok = false) {
+      usbStatus.textContent = text;
+      usbStatus.className = ok ? 'status-box status-ok' : 'status-box';
+    }
+
+    function setConnectedState(connected) {
+      cmdButtons.forEach(b => b.disabled = !connected);
+      btnReset.disabled = !connected;
+      btnPair.textContent = connected ? "🔌 DISPOSITIVO ENLACE (Desconectar con USB)" : "🔌 1. EMPAREJAR DISPOSITIVO";
+    }
+
+    // Safety: if the library isn't present or browser doesn't support WebUSB, show guidance
+    function webadbAvailable() {
+      // webadb library exposes Adb in many builds; check a few fallbacks
+      return (typeof Adb !== 'undefined') || (typeof WebADB !== 'undefined') || (typeof window.AdB !== 'undefined');
+    }
+
+    // Attach event listeners to command buttons
+    function attachCommandHandlers() {
+      cmdButtons.forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const cmd = btn.dataset.cmd;
+          const detail = btn.dataset.detail || cmd;
+          if (!dispositivoAdb) {
+            logLinea('ERROR: Primero debes emparejar el dispositivo.', 'error');
+            return;
+          }
+          // optional: ask for confirmation for certain commands
+          const confirmNeeded = btn.dataset.confirm === 'true';
+          if (confirmNeeded) {
+            if (!confirm(`Confirmar ejecutar: ${detail}`)) return;
+          }
+          logLinea(`Enviando comando: ${cmd}`);
+          await ejecutarComandoSeguro(cmd, detail);
+        });
+      });
+
+      btnReset.addEventListener('click', async () => {
+        if (!dispositivoAdb) { logLinea('ERROR: Dispositivo no enlazado.', 'error'); return; }
+        if (!confirm('ESTAS SEGURO? Esto restaurará valores a su estado por defecto.')) return;
+        logLinea('Iniciando restauración de fábrica (parcial)...');
+        await ejecutarComandoSeguro('wm size reset && wm density reset', 'Reset tamaño/densidad');
+        await ejecutarComandoSeguro('settings put system pointer_speed 0', 'Pointer speed -> 0');
+        await ejecutarComandoSeguro('settings put secure long_press_timeout 300', 'Long press timeout -> 300');
+        await ejecutarComandoSeguro('settings put system view_scroll_friction 0.005', 'Restaurar fricción');
+        await ejecutarComandoSeguro('settings put system touch_pump 0', 'Touch pump -> 0');
+        logLinea('ÉXITO: Teléfono restaurado a los valores originales (según comandos aplicados).');
+      });
+    }
+
+    // Try to execute a shell command and read output if possible.
+    async function ejecutarComandoSeguro(comando, detalle = '') {
+      try {
+        const shell = await dispositivoAdb.shell(comando);
+        // Many webadb shells provide a receive() that returns a Uint8Array or string.
+        try {
+          // prefer receive() (used in original); if it returns data, decode and log
+          const out = await shell.receive?.();
+          if (out) {
+            let text;
+            if (typeof out === 'string') text = out;
+            else if (out instanceof Uint8Array || ArrayBuffer.isView(out)) text = new TextDecoder().decode(out);
+            else text = String(out);
+            logLinea(`Salida: ${text}`);
+          } else {
+            // fallback: if shell has readable stream, read it
+            if (shell.readable && shell.readable.getReader) {
+              const reader = shell.readable.getReader();
+              const decoder = new TextDecoder();
+              let done = false;
+              while (!done) {
+                const { value, done: d } = await reader.read();
+                if (value) logLinea(decoder.decode(value));
+                done = d;
+              }
+              reader.releaseLock();
+            } else {
+              logLinea(`ÉXITO: ${detalle}`);
             }
+          }
+        } catch (readErr) {
+          // don't fail the whole function if streaming isn't supported
+          logLinea(`Comando enviado. No se pudo leer salida: ${readErr.message || readErr}`, 'error');
+        }
+      } catch (err) {
+        logLinea(`Error al ejecutar '${comando}': ${err?.message || err}`, 'error');
+      }
+    }
+
+    // Pair/present device to user and connect
+    async function conectarMovil() {
+      if (!webadbAvailable()) {
+        setStatus('WebADB no disponible en este navegador. Usa Chrome/Edge con WebUSB habilitado.', false);
+        logLinea('ERROR: WebADB / WebUSB no soportado en este navegador.', 'error');
+        return;
+      }
+
+      try {
+        logLinea('Solicitando acceso al dispositivo USB...');
+        // The original code used Adb.open("webusb"). Keep that pattern but guard for API presence:
+        const AdbGlobal = (typeof Adb !== 'undefined') ? Adb : (typeof WebADB !== 'undefined' ? WebADB : window.AdB);
+        if (!AdbGlobal || typeof AdbGlobal.open !== 'function') {
+          throw new Error('La librería webadb cargada no expone el método esperado (Adb.open).');
         }
 
-        async function inyectar(comando, detalle) {
-            if (!dispositivoAdb) return log("ERROR: Primero debes emparejar el dispositivo.");
-            log(`Modificando registro: ${comando.split(' ')[0]}...`);
-            try {
-                let shell = await dispositivoAdb.shell(comando);
-                await shell.receive();
-                log(`ÉXITO: ${detalle}`);
-            } catch(e) {
-                log("Error crítico al enviar parámetros de hardware o falta aceptar el RSA en pantalla.");
-            }
+        // open returns a device connection object (depends on library)
+        dispositivoAdb = await AdbGlobal.open('webusb');
+
+        // Some implementations require connect(); others auto-connect on open
+        if (typeof dispositivoAdb.connect === 'function') {
+          await dispositivoAdb.connect();
         }
 
-        async function restaurarTodo() {
-            if (!dispositivoAdb) return log("ERROR: Dispositivo no enlazado.");
-            log("Limpiando registros de sensibilidad modificados...");
-            try {
-                await dispositivoAdb.shell("wm size reset && wm density reset");
-                await dispositivoAdb.shell("settings put system pointer_speed 0");
-                await dispositivoAdb.shell("settings put secure long_press_timeout 300");
-                await dispositivoAdb.shell("settings put system view_scroll_friction 0.005");
-                await dispositivoAdb.shell("settings put system touch_pump 0");
-                log("ÉXITO: Teléfono restaurado a los valores originales de fábrica.");
-            } catch(e) {
-                log("Error al aplicar el reset completo.");
-            }
+        setStatus('CONEXIÓN EXITOSA: MACRO.COM HARDWARE EN LÍNEA', true);
+        logLinea('Enlace establecido. Registros listos para inyección.');
+        setConnectedState(true);
+
+        // If RSA prompt is pending on device, instruct user to accept it
+        logLinea('Si tu dispositivo muestra un diálogo RSA, acéptalo para permitir comandos ADB.');
+
+        // Optionally register a disconnect listener on the device object if available
+        if (dispositivoAdb.onclose) {
+          dispositivoAdb.onclose = () => {
+            logLinea('Conexión ADB cerrada.');
+            setStatus('DISPOSITIVO DESCONECTADO', false);
+            setConnectedState(false);
+            dispositivoAdb = null;
+          };
         }
-    </script>
+      } catch (err) {
+        setStatus('ERROR: REVISA LA DEPURACIÓN USB O EL CABLE', false);
+        setConnectedState(false);
+        logLinea('Conexión fallida. Recuerda activar "Depuración USB" en tu móvil y aceptar el RSA.', 'error');
+        console.error(err);
+      }
+    }
+
+    // Listen for system-level USB disconnect (browser-level)
+    if (navigator.usb && navigator.usb.addEventListener) {
+      navigator.usb.addEventListener('disconnect', (event) => {
+        logLinea('Evento USB: dispositivo desconectado por el sistema.');
+        setStatus('DISPOSITIVO DESCONECTADO', false);
+        setConnectedState(false);
+        dispositivoAdb = null;
+      });
+    }
+
+    // Bind UI events
+    (function init() {
+      attachCommandHandlers();
+      btnPair.addEventListener('click', async () => {
+        // If already connected, just show helpful message (optionally implement disconnect)
+        if (dispositivoAdb) {
+          if (!confirm('Ya hay un dispositivo enlazado. ¿Deseas volver a emparejar?')) return;
+          // no explicit disconnect in many webadb libs; better reload or set to null
+          try { await dispositivoAdb.close?.(); } catch(e) {}
+          dispositivoAdb = null;
+          setConnectedState(false);
+        }
+        await conectarMovil();
+      });
+      setConnectedState(false);
+    })();
+
+    // NOTE / FUTURE:
+    // - Add device selection UI if the library supports listing multiple devices.
+    // - Implement a robust shell streaming parser for continuous output such as "logcat".
+    // - Consider reworking commands into safer profiles and require additional confirmation for anything beyond settings writes.
+    // - Add optional logging download or "undo" helper that saves previous values before overwriting settings.
+  </script>
 </body>
 </html>
